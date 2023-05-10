@@ -8,17 +8,5 @@ avaliacao = server.api.model('Resultado', {
         description="Média dos raking  das avaliações sobre a satisfação geral",
         max=5, min=0
     ),
-    "custo": fields.Float(
-        description="Média dos raking  das avaliações sobre custo benefício",
-        max=5, min=0
-    ),
-    "entrega": fields.Float(
-        description="Média dos raking  das avaliações sobre entrega",
-        max=5, min=0
-    ),
-    "qualidade": fields.Float(
-        description="Média dos raking  das avaliações sobre qualidade",
-        max=5, min=0
-    ),
-
+    "aspectos" : fields.List(fields.String,description="Aspectos que estão sendo avaliados encontrados")
 })

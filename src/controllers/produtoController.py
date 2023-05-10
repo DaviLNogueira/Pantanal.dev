@@ -1,3 +1,5 @@
+import random
+
 from flask_restx import Resource, fields
 from src.server.instance import server
 from src.validade.validadeJson import existeCampo
@@ -5,7 +7,7 @@ from src.exception.pantanalException import *
 from src.Model.Dto.resultado import Resultado
 from src.Model.schemaDocumentation.resultado import avaliacao
 
-app, api = server.app, server.api
+app, api , cache = server.app, server.api , server.cache
 
 
 @api.route('/produtos')

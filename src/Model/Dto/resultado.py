@@ -4,20 +4,17 @@ from flask import jsonify
 class Resultado:
 
     def __init__(self):
-        self.qualidade = None
-        self.custo = None
-        self.entrega = None
+        self.aspectos = None
         self.sentimento = None
         self.empresa = None
         self.produto = None
 
-    def novaAvaliacao(self, produto, empresa, sentimento, entrega, custo, qualidade):
+    def novaAvaliacao(self, produto, empresa, sentimento,aspectos):
         self.produto = produto
         self.empresa = empresa
         self.sentimento = sentimento
-        self.entrega = entrega
-        self.custo = custo
-        self.qualidade = qualidade
+        self.aspectos = aspectos
+
         return self
 
     def json(self):
@@ -25,7 +22,5 @@ class Resultado:
             "produto": self.produto,
             "empresa ": self.empresa,
             "sentimento": self.sentimento,
-            "entrega": self.entrega,
-            "custo": self.custo,
-            "qualidade": self.qualidade,
+            "aspectos": self.aspectos
         })
