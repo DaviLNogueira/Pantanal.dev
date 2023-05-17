@@ -1,7 +1,7 @@
 from flask import Flask
 from flask_restx import Api , marshal
 from flask_caching import Cache
-import yaml
+from src.moldelo import ia
 
 cache = Cache()
 
@@ -13,6 +13,7 @@ class Server:
         self.app.config['CACHE_TYPE'] = 'simple'
         self.cache = cache
         self.cache.init_app(app=self.app)
+        ia.carregar_modelo()
 
     def run(self):
         self.app.run(
