@@ -19,14 +19,12 @@ USER_AGENT = os.getenv('USER_AGENT')
 HEADERS = ({'User-Agent': USER_AGENT, 'Accept-Language': 'pt-br;q=0.5', 'x-amz-access-key': ACESS_KEY,
             'x-amz-secret-key': SECRET_KEY})
 
-URL = "https://www.amazon.com/s?k=playstation&ref=nb_sb_noss_2"
-
 
 # Function to extract Product Title
 def get_title(soup):
     try:
         # Outer Tag Object
-        title = soup.find("span", attrs={"id": 'productTitle'})
+        title = soup.find("a", attrs={"data-hook": 'product-link'})
 
         # Inner NavigatableString Object
         title_value = title.text
@@ -99,7 +97,8 @@ def get_all_links_from_search_page(URL):
     # Loop for extracting links from Tag Objects
     for link in links:
         links_list.append(link.get('href'))
-
+        if len(links_list) > 5:
+            return links_list
     return links_list
 
 
@@ -122,9 +121,14 @@ def by_product(link_to_review):
     next_page = not None
     avaliacoes = []
     new_soup = ''
+    produto = ''
+    index_ref = link_to_review.find('ref') - 1
+    index_product_reviews = link_to_review.find('s') + 2
+    product_id = link_to_review[index_product_reviews: index_ref]
+    codigo = product_id.split("/")[-1]
 
-    while (next_page is not None) and counter_page < 10:
-        url = link_to_review
+    while (next_page is not None) and counter_page < 30:
+        url = f"https://www.amazon.com/reviews/{codigo}?pageNumber={counter_page}&pageSize=10&sortBy=recent"
 
         webpage = requests.get(url, params=counter_page, headers=HEADERS)
 
@@ -136,50 +140,28 @@ def by_product(link_to_review):
             avaliacoes.append(review)
         next_page = get_next_page_of_reviews(new_soup)
         counter_page += 1
-    produto = get_title(new_soup)
+        if len(produto) < 1:
+            produto = get_title(new_soup)
     return produto, avaliacoes
 
 
 def mine_reviews_from_the_reviews_page(array_of_link_to_reviews, dictionary):
     for link_to_review in array_of_link_to_reviews:
-        cache_key = f"link{link_to_review}"  # Define uma chave única para o cache
-        cached_results = cache.get(cache_key)
-        if cached_results :
-            produto_cahe = cached_results.get('produto')
-            avaliacoes = cached_results.get('avaliacoes')
-            for avaliacao in avaliacoes:
-                dictionary['produto'].append(produto_cahe)
-                dictionary['avaliacoes'].append(avaliacao)
-            return
-        index_ref = link_to_review.find('ref') - 1
-        index_product_reviews = link_to_review.find('s') + 2
-        product_id = link_to_review[index_product_reviews: index_ref]
-        counter_page = 1
-
-        next_page = not None
-
-        while (next_page is not None) and counter_page < 10:
-            url = f"https://www.amazon.com/reviews/{product_id}?pageNumber={counter_page}&pageSize=10&sortBy=recent"
-
-            webpage = requests.get(url, params=counter_page, headers=HEADERS)
-
-            new_soup = BeautifulSoup(webpage.content, "html.parser")
-
-            produto, review_comments = get_reviews(new_soup)
-            for review in review_comments:
-                dictionary['produto'].append(produto)
-                dictionary['avaliacoes'].append(review)
-
-            next_page = get_next_page_of_reviews(new_soup)
-
-            counter_page += 1
+        produto, avaliacoes = by_product(link_to_review)
+        dictionary['produto'].append(produto)
+        dictionary['avaliacoes'].append(avaliacoes)
+        dictionary['link'].append(link_to_review)
+    return dictionary
 
 
-def mine_from_the_search_page():
-    dictionary = {"produto": [], "avaliacoes": []}
+def mine_from_the_search_page(produto):
+    dictionary = {"produto": [], "avaliacoes": [], 'link': []}
     review_link_list = []
 
     # A partir daqui Multi-thread liberado
+
+    URL = f"https://www.amazon.com/s?k={produto}"
+
     links_list = get_all_links_from_search_page(URL)
 
     for link in links_list:
@@ -218,15 +200,3 @@ def mine_from_the_search_page():
 
     # ! Debug
     return dictionary
-
-
-def transform_dictionary_to_CSV(dictionary):
-    dataFrame = pd.DataFrame.from_dict(dictionary)
-
-    dataFrame['produto'].replace('', np.nan, inplace=True)
-    dataFrame = dataFrame.dropna(subset=['produto'])
-
-    dataFrame.to_csv("amazon_data.csv", header=True, index=False)
-
-    # ! Debug
-    return dataFrame

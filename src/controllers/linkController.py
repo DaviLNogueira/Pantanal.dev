@@ -33,10 +33,11 @@ class Produto(Resource):
 
         produto, avaliacaoes = amazon.by_product(link)
         avaliacoes_filtradas = [ava for ava in avaliacaoes if len(avaliacao) < 512]
+
         if len(avaliacoes_filtradas) < 1:
             execption = pantanalException(mensagem="Não foi possível realizar a busca por avaliações")
             return execption.get()
-        predicts = ia.predecit(avaliacaoes)
+        predicts = ia.predecit(avaliacoes_filtradas)
 
         resultado = Resultado(sentimento=0, produto=produto,avaliacoes=avaliacoes_filtradas)
         cache.set(cache_key, {'produto': produto, 'sentimento': 0, 'avaliacoes': avaliacaoes}, timeout=600)
