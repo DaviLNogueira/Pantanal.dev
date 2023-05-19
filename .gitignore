@@ -1,3 +1,4 @@
 *.env
 tutorial-env\
 .idea
+/venv/

@@ -1,5 +1,4 @@
 from flask_restx import Resource, fields
-from flask import jsonify
 from src.server.instance import server
 from src.validade.validadeJson import existeCampo
 from src.exception.pantanalException import *
@@ -33,17 +32,19 @@ class Produto(Resource):
             return self.obter_cache(cached_results).json()
 
         produto, avaliacaoes = amazon.by_product(link)
+        avaliacoes_filtradas = [ava for ava in avaliacaoes if len(avaliacao) < 512]
+        if len(avaliacoes_filtradas) < 1:
+            execption = pantanalException(mensagem="Não foi possível realizar a busca por avaliações")
+            return execption.get()
         predicts = ia.predecit(avaliacaoes)
 
-        resultado = Resultado(aspectos='', produto=produto, sentimento=sum(predicts) / len(predicts) * 2.5, empresa='',
-                              avaliacoes=avaliacaoes)
-        cache.set(cache_key, {'produto': produto, 'resultados': predicts, 'avaliacoes': avaliacaoes}, timeout=600)
+        resultado = Resultado(sentimento=0, produto=produto,avaliacoes=avaliacoes_filtradas)
+        cache.set(cache_key, {'produto': produto, 'sentimento': 0, 'avaliacoes': avaliacaoes}, timeout=600)
 
         return resultado.json()
 
     def obter_cache(self, cached_results):
         produto_cahe = cached_results.get('produto')
-        predicts = cached_results.get('resultados')
+        sentimento = cached_results.get('sentimento')
         avaliacoes = cached_results.get('avaliacoes')
-        return Resultado(aspectos='', produto=produto_cahe, sentimento=sum(predicts) / len(predicts) * 2.5, empresa='',
-                         avaliacoes=avaliacoes)
+        return Resultado(sentimento=sentimento, produto=produto_cahe,avaliacoes=avaliacoes)
