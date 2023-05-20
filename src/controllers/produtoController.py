@@ -7,7 +7,7 @@ from src.exception.pantanalException import *
 from src.Model.Dto.resultado import Resultado
 from src.Model.schemaDocumentation.resultado import avaliacao
 
-app, api , cache = server.app, server.api , server.cache
+app, api, cache = server.app, server.api, server.cache
 
 
 @api.route('/produtos')

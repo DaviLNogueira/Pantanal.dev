@@ -44,17 +44,17 @@ class Produto(Resource):
         for predicao in predicts:
             if predicao == 2:
                 soma += 5
-            
+
             elif predicao == 1:
                 soma += 3
-            
+
             elif predicao == 0:
                 soma += 1
-        
+
         sentimento = round(soma / len(predicts), 2)
         print(sentimento)
 
-        resultado = Resultado(sentimento=sentimento, produto=produto,avaliacoes=avaliacoes_filtradas)
+        resultado = Resultado(sentimento=sentimento, produto=produto, avaliacoes=avaliacoes_filtradas)
         cache.set(cache_key, {'produto': produto, 'sentimento': sentimento, 'avaliacoes': avaliacaoes}, timeout=600)
 
         return resultado.json()
@@ -63,4 +63,4 @@ class Produto(Resource):
         produto_cahe = cached_results.get('produto')
         sentimento = cached_results.get('sentimento')
         avaliacoes = cached_results.get('avaliacoes')
-        return Resultado(sentimento=sentimento, produto=produto_cahe,avaliacoes=avaliacoes)
+        return Resultado(sentimento=sentimento, produto=produto_cahe, avaliacoes=avaliacoes)

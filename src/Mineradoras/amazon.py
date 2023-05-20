@@ -2,8 +2,6 @@ from bs4 import BeautifulSoup
 from threading import Thread
 from multiprocessing import cpu_count
 import requests
-import pandas as pd
-import numpy as np
 import os
 from dotenv import load_dotenv
 from src.server.instance import server
