@@ -39,9 +39,23 @@ class Produto(Resource):
             execption = pantanalException(mensagem="Não foi possível realizar a busca por avaliações")
             return execption.get()
         predicts = ia.predecit(avaliacoes_filtradas)
+        soma = 0
 
-        resultado = Resultado(sentimento=0, produto=produto,avaliacoes=avaliacoes_filtradas)
-        cache.set(cache_key, {'produto': produto, 'sentimento': 0, 'avaliacoes': avaliacaoes}, timeout=600)
+        for predicao in predicts:
+            if predicao == 2:
+                soma += 5
+            
+            elif predicao == 1:
+                soma += 3
+            
+            elif predicao == 0:
+                soma += 1
+        
+        sentimento = round(soma / len(predicts), 2)
+        print(sentimento)
+
+        resultado = Resultado(sentimento=sentimento, produto=produto,avaliacoes=avaliacoes_filtradas)
+        cache.set(cache_key, {'produto': produto, 'sentimento': sentimento, 'avaliacoes': avaliacaoes}, timeout=600)
 
         return resultado.json()
 
