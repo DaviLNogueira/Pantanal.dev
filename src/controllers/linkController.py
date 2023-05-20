@@ -33,6 +33,7 @@ class Produto(Resource):
 
         produto, avaliacaoes = amazon.by_product(link)
         avaliacoes_filtradas = [ava for ava in avaliacaoes if len(avaliacao) < 512]
+        avaliacoes_filtradas = avaliacoes_filtradas[0:50]
 
         if len(avaliacoes_filtradas) < 1:
             execption = pantanalException(mensagem="Não foi possível realizar a busca por avaliações")

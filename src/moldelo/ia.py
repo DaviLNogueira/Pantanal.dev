@@ -10,7 +10,8 @@ def carregar_modelo():
     if modelo is None:
         modelo = TFAutoModelForSequenceClassification.from_pretrained("bert-base-cased", num_labels=3)
         loss = tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True)
-        modelo.compile(keras.optimizers.Adam(3e-5), loss=loss)
+        modelo.compile(optimizer='adam', loss=loss, metrics=['accuracy'])
+        modelo.load_weights('./src/moldelo/model/')
 
 
 def preparar(reviews):
